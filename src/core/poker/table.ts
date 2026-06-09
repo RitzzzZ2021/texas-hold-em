@@ -158,15 +158,48 @@ function findWinnerIds(players: Player[], communityCards: GameState["communityCa
   return winnerIds;
 }
 
+function settleHand(state: GameState, winnerIds: string[]): GameState {
+  if (state.isSettled || winnerIds.length === 0) {
+    return {
+      ...state,
+      winnerIds
+    };
+  }
+
+  const totalPot = state.pots.reduce((sum, pot) => sum + pot.amount, 0);
+  const baseShare = Math.floor(totalPot / winnerIds.length);
+  let remainder = totalPot % winnerIds.length;
+
+  const players = state.players.map((player) => {
+    if (!winnerIds.includes(player.id)) {
+      return player;
+    }
+
+    const extraChip = remainder > 0 ? 1 : 0;
+    remainder -= extraChip;
+
+    return {
+      ...player,
+      stack: player.stack + baseShare + extraChip
+    };
+  });
+
+  return {
+    ...state,
+    players,
+    winnerIds,
+    isSettled: true
+  };
+}
+
 function advanceStreetIfNeeded(state: GameState): GameState {
   const winnerIds = findWinnerIds(state.players, state.communityCards);
 
   if (winnerIds.length > 0) {
-    return {
+    return settleHand({
       ...state,
-      street: "showdown",
-      winnerIds
-    };
+      street: "showdown"
+    }, winnerIds);
   }
 
   if (!isBettingRoundComplete(state)) {
@@ -189,11 +222,12 @@ function advanceStreetIfNeeded(state: GameState): GameState {
   }
 
   if (nextState.street === "showdown") {
-    return {
+    const showdownState = {
       ...nextState,
-      activePlayerIndex: nextState.dealerIndex,
-      winnerIds: findWinnerIds(nextState.players, nextState.communityCards)
+      activePlayerIndex: nextState.dealerIndex
     };
+
+    return settleHand(showdownState, findWinnerIds(showdownState.players, showdownState.communityCards));
   }
 
   if (playersWhoCanAct(nextState.players).length <= 1) {
@@ -210,6 +244,7 @@ export function createNewHand(config: TableConfig): GameState {
 
   let deck = shuffleDeck(createDeck());
   let players = createPlayers(config);
+  const initialStacks = Object.fromEntries(players.map((player) => [player.id, player.stack]));
 
   for (let cardIndex = 0; cardIndex < 2; cardIndex += 1) {
     players = players.map((player) => {
@@ -255,7 +290,9 @@ export function createNewHand(config: TableConfig): GameState {
     minRaise: config.bigBlind,
     handNumber: 1,
     actedPlayerIds: [],
-    winnerIds: []
+    winnerIds: [],
+    initialStacks,
+    isSettled: false
   };
 }
 

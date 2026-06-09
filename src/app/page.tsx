@@ -1,5 +1,10 @@
-import { PokerTable } from "@/components/table/PokerTable";
+import { AuthGate } from "@/components/account/AuthGate";
+import { GameLobby } from "@/components/game/GameLobby";
 
 export default function Home() {
-  return <PokerTable />;
+  return (
+    <AuthGate>
+      <GameLobby />
+    </AuthGate>
+  );
 }

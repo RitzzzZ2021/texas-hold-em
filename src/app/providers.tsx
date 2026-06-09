@@ -1,6 +1,7 @@
 "use client";
 
 import { Provider } from "react-redux";
+import { AuthSessionProvider } from "./AuthSessionProvider";
 import { store } from "@/store/store";
 
 interface ProvidersProps {
@@ -8,5 +9,9 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
-  return <Provider store={store}>{children}</Provider>;
+  return (
+    <Provider store={store}>
+      <AuthSessionProvider>{children}</AuthSessionProvider>
+    </Provider>
+  );
 }

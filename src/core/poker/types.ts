@@ -60,6 +60,8 @@ export interface GameState {
   handNumber: number;
   actedPlayerIds: string[];
   winnerIds: string[];
+  initialStacks: Record<string, number>;
+  isSettled: boolean;
 }
 
 export type PlayerAction =

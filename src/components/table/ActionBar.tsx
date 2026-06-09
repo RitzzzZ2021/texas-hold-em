@@ -2,6 +2,7 @@
 
 import { playerActed, startNewHand } from "@/features/game/gameSlice";
 import { selectActivePlayer, selectTable } from "@/features/game/selectors";
+import { selectAccountProfile } from "@/features/account/selectors";
 import { selectLanguage } from "@/features/preferences/selectors";
 import { t } from "@/i18n/translations";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -13,19 +14,30 @@ export function ActionBar() {
   const table = useAppSelector(selectTable);
   const activePlayer = useAppSelector(selectActivePlayer);
   const language = useAppSelector(selectLanguage);
+  const profile = useAppSelector(selectAccountProfile);
 
   if (!table || !activePlayer) {
     return null;
   }
 
   const callAmount = Math.max(0, table.currentBet - activePlayer.bet);
+  const startingStack = Math.max(1, profile?.chips ?? 1000);
+  const startHandFromAccount = () =>
+    dispatch(
+      startNewHand({
+        smallBlind: 10,
+        bigBlind: 20,
+        startingStack,
+        playerNames: ["You", "Ada", "Grace", "Linus", "Margaret", "Donald"]
+      })
+    );
 
   if (table.street === "showdown") {
     return (
       <div className="flex flex-wrap items-center justify-center gap-2">
         <button
           className="h-10 rounded-md bg-amber-300 px-4 text-sm font-bold text-slate-950 hover:bg-amber-200"
-          onClick={() => dispatch(startNewHand())}
+          onClick={startHandFromAccount}
           type="button"
         >
           {t(language, "newHand")}
@@ -42,7 +54,7 @@ export function ActionBar() {
         </div>
         <button
           className="h-10 rounded-md border border-white/10 bg-slate-900 px-4 text-sm font-semibold hover:bg-slate-800"
-          onClick={() => dispatch(startNewHand())}
+          onClick={startHandFromAccount}
           type="button"
         >
           {t(language, "newHand")}
@@ -55,7 +67,7 @@ export function ActionBar() {
     <div className="flex flex-wrap items-center justify-center gap-2">
       <button
         className="h-10 rounded-md border border-white/10 bg-slate-900 px-4 text-sm font-semibold hover:bg-slate-800"
-        onClick={() => dispatch(startNewHand())}
+        onClick={startHandFromAccount}
         type="button"
       >
         {t(language, "newHand")}

@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { AccountBar } from "@/components/account/AccountBar";
 import { ActionBar } from "./ActionBar";
 import { CardView } from "./CardView";
 import { LanguageToggle } from "./LanguageToggle";
 import { PlayerSeat } from "./PlayerSeat";
 import { decideOpponentAction } from "@/core/poker/opponentAI";
-import { playerActed, startNewHand } from "@/features/game/gameSlice";
+import { applyChipDelta } from "@/features/account/accountSlice";
+import { playerActed } from "@/features/game/gameSlice";
 import { selectLastGameError, selectTable } from "@/features/game/selectors";
 import { selectLanguage } from "@/features/preferences/selectors";
 import { t } from "@/i18n/translations";
@@ -19,12 +21,7 @@ export function PokerTable() {
   const table = useAppSelector(selectTable);
   const error = useAppSelector(selectLastGameError);
   const language = useAppSelector(selectLanguage);
-
-  useEffect(() => {
-    if (!table) {
-      dispatch(startNewHand());
-    }
-  }, [dispatch, table]);
+  const persistedHandIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!table || table.street === "showdown") {
@@ -44,14 +41,24 @@ export function PokerTable() {
     return () => window.clearTimeout(timeoutId);
   }, [dispatch, table]);
 
+  useEffect(() => {
+    if (!table || table.street !== "showdown" || !table.isSettled || persistedHandIdRef.current === table.id) {
+      return;
+    }
+
+    const heroPlayer = table.players.find((player) => player.id === HERO_PLAYER_ID);
+    const heroStartingStack = table.initialStacks[HERO_PLAYER_ID];
+
+    if (!heroPlayer || heroStartingStack === undefined) {
+      return;
+    }
+
+    persistedHandIdRef.current = table.id;
+    dispatch(applyChipDelta(heroPlayer.stack - heroStartingStack));
+  }, [dispatch, table]);
+
   if (!table) {
-    return (
-      <main className="grid min-h-screen place-items-center bg-slate-950 p-4 text-slate-100">
-        <div className="rounded-md border border-white/10 bg-slate-900 px-4 py-3 text-sm font-semibold">
-          {t(language, "shufflingDeck")}
-        </div>
-      </main>
-    );
+    return null;
   }
 
   const activePlayer = table.players[table.activePlayerIndex];
@@ -76,6 +83,7 @@ export function PokerTable() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
+            <AccountBar />
             <LanguageToggle />
             <div className="rounded-md border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-semibold">
               {t(language, "pot")} ${table.pots.reduce((sum, pot) => sum + pot.amount, 0)}
