@@ -41,7 +41,7 @@ export function AuthForm() {
     <main className="grid min-h-screen place-items-center bg-slate-950 p-4 text-slate-100">
       <section className="w-full max-w-sm rounded-lg border border-white/10 bg-slate-900 p-5 shadow-2xl">
         <div className="mb-5">
-          <h1 className="text-2xl font-bold tracking-normal">Texas Hold'em</h1>
+          <h1 className="text-2xl font-bold tracking-normal">Texas Hold&apos;em</h1>
           <p className="mt-1 text-sm text-slate-300">Sign in to play with persistent chips.</p>
         </div>
 

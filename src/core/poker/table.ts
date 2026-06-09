@@ -312,7 +312,7 @@ export function applyPlayerAction(state: GameState, action: PlayerAction): GameS
   }
 
   const player = state.players[playerIndex];
-  let players = [...state.players];
+  const players = [...state.players];
   let currentBet = state.currentBet;
   let minRaise = state.minRaise;
   let potDelta = 0;

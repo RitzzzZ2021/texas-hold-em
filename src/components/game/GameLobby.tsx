@@ -17,7 +17,7 @@ function BlurredTablePreview() {
       <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-7xl flex-col justify-between gap-6 blur-sm">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold tracking-normal md:text-3xl">Texas Hold'em</h1>
+            <h1 className="text-2xl font-bold tracking-normal md:text-3xl">Texas Hold&apos;em</h1>
             <p className="text-sm text-slate-200">Ready room</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
